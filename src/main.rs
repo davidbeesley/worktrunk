@@ -37,13 +37,14 @@ use commands::command_executor::{CommandContext, build_hook_context};
 use commands::handle_select;
 use commands::worktree::{SwitchResult, handle_push};
 use commands::{
-    MergeOptions, OperationMode, RebaseResult, SquashResult, add_approvals, approve_hooks,
-    clear_approvals, execute_switch, handle_completions, handle_config_create, handle_config_show,
-    handle_configure_shell, handle_hints_clear, handle_hints_get, handle_hook_show, handle_init,
-    handle_list, handle_merge, handle_rebase, handle_remove, handle_remove_current,
-    handle_show_theme, handle_squash, handle_state_clear, handle_state_clear_all, handle_state_get,
-    handle_state_set, handle_state_show, handle_unconfigure_shell, plan_switch,
-    resolve_worktree_arg, run_hook, step_commit, step_copy_ignored, step_for_each,
+    MergeOptions, OperationMode, RebaseResult, SquashResult, SyncOptions, add_approvals,
+    approve_hooks, clear_approvals, execute_switch, handle_completions, handle_config_create,
+    handle_config_show, handle_configure_shell, handle_hints_clear, handle_hints_get,
+    handle_hook_show, handle_init, handle_list, handle_merge, handle_rebase, handle_remove,
+    handle_remove_current, handle_show_theme, handle_squash, handle_state_clear,
+    handle_state_clear_all, handle_state_get, handle_state_set, handle_state_show, handle_sync,
+    handle_unconfigure_shell, plan_switch, resolve_worktree_arg, run_hook, step_commit,
+    step_copy_ignored, step_for_each,
 };
 use output::{execute_user_command, handle_remove_output, handle_switch_output};
 
@@ -1143,6 +1144,40 @@ fn main() {
                 commit: flag_pair(commit, no_commit),
                 rebase: flag_pair(rebase, no_rebase),
                 remove: flag_pair(remove, no_remove),
+                verify: flag_pair(verify, no_verify),
+                yes,
+                stage,
+            })
+        }
+        Commands::Sync {
+            branch,
+            target,
+            squash,
+            no_squash,
+            commit,
+            no_commit,
+            rebase,
+            no_rebase,
+            verify,
+            no_verify,
+            yes,
+            stage,
+        } => {
+            // Convert paired flags to Option<bool>
+            fn flag_pair(positive: bool, negative: bool) -> Option<bool> {
+                match (positive, negative) {
+                    (true, _) => Some(true),
+                    (_, true) => Some(false),
+                    _ => None,
+                }
+            }
+
+            handle_sync(SyncOptions {
+                branch: branch.as_deref(),
+                target: target.as_deref(),
+                squash: flag_pair(squash, no_squash),
+                commit: flag_pair(commit, no_commit),
+                rebase: flag_pair(rebase, no_rebase),
                 verify: flag_pair(verify, no_verify),
                 yes,
                 stage,

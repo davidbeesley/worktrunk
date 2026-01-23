@@ -19,6 +19,7 @@ pub(crate) mod repository_ext;
 pub(crate) mod select;
 pub(crate) mod statusline;
 pub(crate) mod step_commands;
+pub(crate) mod sync_cmd;
 pub(crate) mod worktree;
 
 pub(crate) use command_approval::approve_hooks;
@@ -41,6 +42,7 @@ pub(crate) use step_commands::{
     RebaseResult, SquashResult, handle_rebase, handle_squash, step_commit, step_copy_ignored,
     step_show_squash_prompt,
 };
+pub(crate) use sync_cmd::{SyncOptions, handle_sync};
 pub(crate) use worktree::{
     OperationMode, execute_switch, handle_remove, handle_remove_current,
     is_worktree_at_expected_path, plan_switch, resolve_worktree_arg, worktree_display_name,

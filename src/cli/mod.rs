@@ -921,6 +921,105 @@ lint = "cargo clippy"
         #[arg(long)]
         stage: Option<crate::commands::commit::StageMode>,
     },
+    /// Sync worktree branch with target (bidirectional merge)
+    ///
+    /// Like merge but keeps the worktree for continued development.
+    #[command(
+        after_long_help = r#"Synchronizes a worktree branch with the target branch (default: main). Unlike `wt merge`, the worktree is preserved after syncing.
+
+## Examples
+
+Sync current worktree with the default branch:
+
+```console
+wt sync
+```
+
+Sync a specific branch (from main worktree):
+
+```console
+wt sync feature-branch
+```
+
+Sync with a different target branch:
+
+```console
+wt sync --target develop
+```
+
+## Pipeline
+
+`wt sync` runs the same steps as `wt merge` but keeps the worktree:
+
+1. **Squash** — Combines all commits since target into one
+2. **Rebase** — Rebases onto target if behind
+3. **Pre-merge hooks** — Validation before merge
+4. **Merge** — Fast-forward merge to target branch
+5. **Keep worktree** — Unlike merge, the worktree is preserved
+
+## Use cases
+
+- Integrate changes to main while continuing work on the feature
+- Keep a long-running feature branch in sync with main
+- Test that your changes merge cleanly without abandoning the worktree
+
+## See also
+
+- [`wt merge`](@/merge.md) — Merge and remove the worktree
+- [`wt step`](@/step.md) — Run individual operations
+"#
+    )]
+    Sync {
+        /// Branch to sync (required from main worktree, defaults to current branch otherwise)
+        #[arg(add = crate::completion::worktree_branch_completer())]
+        branch: Option<String>,
+
+        /// Target branch to sync with
+        ///
+        /// Defaults to the default branch.
+        #[arg(short, long, add = crate::completion::branch_value_completer())]
+        target: Option<String>,
+
+        /// Force commit squashing
+        #[arg(long, overrides_with = "no_squash", hide = true)]
+        squash: bool,
+
+        /// Skip commit squashing
+        #[arg(long = "no-squash", overrides_with = "squash")]
+        no_squash: bool,
+
+        /// Force commit and squash
+        #[arg(long, overrides_with = "no_commit", hide = true)]
+        commit: bool,
+
+        /// Skip commit and squash
+        #[arg(long = "no-commit", overrides_with = "commit")]
+        no_commit: bool,
+
+        /// Force rebasing onto target
+        #[arg(long, overrides_with = "no_rebase", hide = true)]
+        rebase: bool,
+
+        /// Skip rebase (fail if not already rebased)
+        #[arg(long = "no-rebase", overrides_with = "rebase")]
+        no_rebase: bool,
+
+        /// Force running hooks
+        #[arg(long, overrides_with = "no_verify", hide = true)]
+        verify: bool,
+
+        /// Skip hooks
+        #[arg(long = "no-verify", overrides_with = "verify")]
+        no_verify: bool,
+
+        /// Skip approval prompts
+        #[arg(short, long)]
+        yes: bool,
+
+        /// What to stage before committing [default: all]
+        #[arg(long)]
+        stage: Option<crate::commands::commit::StageMode>,
+    },
     /// Interactive worktree selector
     ///
     /// Browse and switch worktrees with live preview.
